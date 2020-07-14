@@ -1,0 +1,8 @@
+2020-07-14  Mary Bennett <mary.bennett@embecosm.com>
+
+	* ChangeLog: New file
+	* acker.c: New file
+	* fib.c: New file
+	* fib2.c: New file
+	* seive.c: New file
+	* queen.c: New file
