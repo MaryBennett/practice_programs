@@ -1,3 +1,12 @@
+2020-07-22  Mary Bennett <mary.bennett@embecosm.com>
+
+	* queen.c: Added attempt at stack
+	* floyd.c: New file
+	* friday.c: New file
+	* sort.c: New file
+	* sum1.c: New file
+	* sum2.c: New file
+
 2020-07-14  Mary Bennett <mary.bennett@embecosm.com>
 
 	* ChangeLog: New file
