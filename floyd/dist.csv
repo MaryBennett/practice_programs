@@ -1,0 +1,6 @@
+From,To,Distance
+A,C,-2
+B,A,4
+B,C,3
+D,B,-1
+C,D,2
