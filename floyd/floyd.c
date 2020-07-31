@@ -1,4 +1,4 @@
-/* Floyd-Warshall Algroithm V0.1
+/* Floyd-Warshall Algroithm V0.2
 
    Copyright (C) 2020 Embecosm Limited <www.embecosm.com>
    Contributor: Mary Bennett <mary.bennett@embecosm.com>
@@ -10,12 +10,10 @@
 #include <string.h>
 #include <assert.h>
 
-/* define v & dist */
-#define VERTEX 4 /* Amount of nodes */
-#define INFINITE 100000000 /* Max value for distances */
-signed int DIST[VERTEX][VERTEX]; /* Grid of minimum distances */
-#define LINE_LEN 60 /* Maximum line length of csv */
-enum colour_t { BLACK, RED }; /* RB tree colour of nodes */
+
+#define INFINITE 100000000         /* Max value for distances */
+#define LINE_LEN 60                /* Maximum line length of csv */
+enum colour_t { BLACK, RED };      /* RB tree colour of nodes */
 
 /* Structure for each distance */
 typedef struct distances
@@ -49,7 +47,7 @@ RB_NODE *root = NULL;
 void usage (void);
 
 /* Initialises board to -1 and sets diagonal */
-void initBoard (void);
+void initBoard (int vertex, signed int dist [vertex][vertex]);
 
 /* Work out how many collumns
    Return collumn length (FAIL: 0) */
@@ -66,16 +64,16 @@ void delList (void);
 int delItem (void);
 
 /* The meaty loop */
-void loopDist (void);
+void loopDist (int vertex, signed int dist[vertex][vertex]);
 
 /* Print dist */
-void printDist (void);
+void printDist (int vertex, signed int dist[vertex][vertex]);
 
 /* Displays the list */
 void displayList (void);
 
 /* Reads linked list and assigns the distances to DIST */
-void assignDist (void);
+void assignDist (int vertex, signed int dist [vertex][vertex]);
 
 /* -----------------------
   Red black tree functions
@@ -153,29 +151,26 @@ int main (int argc, char const *argv[])
 
   /* Find keys */
   int maxV = setKeys (root, 1);
-  if (maxV == -1)
+  maxV--;
+  if (maxV <= 0)
     {
       printf("ERROR: keys failed to set.\n");
       return -1;
     }
-  else if (maxV != VERTEX + 1)
-    {/* TODO: variable number of nodes */
-      printf("ERROR: Wrong number of nodes.\n");
-      return -1;
-    }
   //displayTree (root);
-
-  initBoard();
-
+  
+  signed int dist [maxV][maxV];   /* Grid of minimum distances */
+  initBoard(maxV, dist);
+  
   /* Fill the easy squares */
-  assignDist();
+  assignDist(maxV, dist);
 
   printf("Current table:\n");
-  printDist();
+  printDist(maxV, dist);
 
-  loopDist();
+  loopDist(maxV, dist);
   printf("\n\nNew table:\n");
-  printDist();
+  printDist(maxV, dist);
   
   delList();
 
@@ -188,7 +183,7 @@ int main (int argc, char const *argv[])
 void usage (void)
 {
   printf("Usage:\n");
-  printf("Floyd Warshall Algortim Version 0.1\n\n");
+  printf("Floyd Warshall Algortim Version 0.2\n\n");
   printf("Copyright (C) 2020 Embecosm Limited <www.embecosm.com>\n");
   printf("Contributor: Mary Bennett <mary.bennett@embecosm.com>\n");
   printf("SPDX-License-Identifier: GPL-3.0-or-later\n\n");
@@ -197,20 +192,20 @@ void usage (void)
 }
 
 /* Initialises board to -1 and sets diagonal */
-void initBoard (void)
+void initBoard (int vertex, signed int dist [vertex][vertex])
 {
   /* Initialise to -1? */
-  for (int m = 0; m < VERTEX; m++)
-    for (int n = 0; n < VERTEX; n++)
-      DIST[n][m] = INFINITE;
+  for (int m = 0; m < vertex; m++)
+    for (int n = 0; n < vertex; n++)
+      dist [n][m] = vertex;
 
   /* Set the 0s */
-  for (int i = 0; i < VERTEX; i++)
-    DIST[i][i] = 0;
+  for (int i = 0; i < vertex; i++)
+    dist [i][i] = 0;
 }
 
 /* The meaty loop */
-void loopDist (void)
+void loopDist (int vertex, signed int dist[vertex][vertex])
 {
   /*for k from 1 to V
   for i from 1 to V
@@ -218,25 +213,25 @@ void loopDist (void)
       if dist[i][j] > dist[i][k] + dist[k][j]
       dist[i][j] <- dist[i][k] + dist[k][j]*/
 
-  for (int k = 0; k < VERTEX; k++)
-    for (int j = 0; j < VERTEX; j++)
-      for (int i = 0; i < VERTEX; i++)
+  for (int k = 0; k < vertex; k++)
+    for (int j = 0; j < vertex; j++)
+      for (int i = 0; i < vertex; i++)
 	{
-	  if ((DIST[i][k] == INFINITE) || (DIST[k][j] == INFINITE)) {}
-	  else if ((DIST[i][j] == INFINITE) || (DIST[i][j] > DIST[i][k] + DIST[k][j]))
-	    DIST[i][j] = DIST[i][k] + DIST[k][j];
+	  if ((dist[i][k] == INFINITE) || (dist[k][j] == INFINITE)) {}
+	  else if ((dist[i][j] == INFINITE) || (dist[i][j] > dist[i][k] + dist[k][j]))
+	    dist[i][j] = dist[i][k] + dist[k][j];
 	}
 }
 
 /* Print dist */
-void printDist (void)
+void printDist (int vertex, signed int dist [vertex][vertex])
 {
   printf("|---------------|\n|");
-  for (int i = 0; i < VERTEX; i++)
+  for (int i = 0; i < vertex; i++)
     {
-      for (int j = 0; j < VERTEX; j++)
+      for (int j = 0; j < vertex; j++)
 	{
-	  printf(" %i |", DIST[i][j]);
+	  printf(" %i |", dist [i][j]);
 	}
       printf("\n|---------------|\n|");
     }
@@ -396,7 +391,7 @@ int delItem (void)
 }
 
 /* Reads linked list and assigns the distances to DIST */
-void assignDist (void)
+void assignDist (int vertex, signed int dist [vertex][vertex])
 {
   DISTANCE *record = head;
   while (record != NULL)
@@ -410,7 +405,7 @@ void assignDist (void)
 	  return;
 	}
 
-      DIST [x - 1][y - 1] = record->distance;
+      dist [x - 1][y - 1] = record->distance;
       record = record->next;
     }
 }
